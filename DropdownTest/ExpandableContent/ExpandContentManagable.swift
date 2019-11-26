@@ -10,7 +10,7 @@ import UIKit
 
 protocol ExpandContentManagable: AnyObject, UITableViewDelegate, UITableViewDataSource {
     associatedtype Item
-    associatedtype CellType
+    associatedtype CellType: UITableViewCell
 
     var ContentCellType: CellType.Type { get }
     var items: [Item] { get set }

@@ -12,9 +12,7 @@ class DataManager: NSObject, ExpandContentManagable {
     typealias CellType = DataTableViewCell
 
     // MARK: - Properties
-    var ContentCellType: DataTableViewCell.Type {
-        return DataTableViewCell.self
-    }
+    let ContentCellType = DataTableViewCell.self
     var items = [DataManagerModel]()
 
     // MARK: - Lifecycle

@@ -28,13 +28,9 @@ class ExpandableContentView<T: ExpandContentManagable>: NSObject, ExpandViewable
 
     // MARK: - Lifecycle
     init(manager: T, configurationBlock: @escaping (UITapGestureRecognizer, UIView, inout ((Bool) -> Void)) -> Void) {
-        guard let cellType = manager.ContentCellType as? UITableViewCell.Type else {
-            fatalError("Content cell type doesn't inherit from UITableViewCell")
-        }
-
         self.manager = manager
 
-        contentTableView.register(nibWithCellClass: cellType)
+        contentTableView.register(nibWithCellClass: manager.ContentCellType)
         contentTableView.dataSource = manager
         contentTableView.delegate = manager
 

@@ -15,22 +15,11 @@ class ExpandableListViewController: UIViewController {
 
     // MARK: - Variables
     private (set) var content = [ExpandViewable]()
-    private var ifNeedsToUpdateLayout = false
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupInitialState()
-    }
-
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-
-        guard !content.isEmpty,
-            !ifNeedsToUpdateLayout else { return }
-
-        ifNeedsToUpdateLayout = true
-        forceUpdateLayout()
     }
 
     // MARK: - Actions
@@ -39,14 +28,30 @@ class ExpandableListViewController: UIViewController {
             (index ?? 0) >= 0 else { return }
 
         let position = index ?? content.endIndex
-        content.insert(contentsOf: expandableContent, at: position)
-        tableView.insertSections(IndexSet(integersIn: position..<position + expandableContent.count), with: .automatic)
-        ifNeedsToUpdateLayout = false
+        let originalCollapseState = expandableContent.map { $0.isCollapsed }
+
+        tableView.performBatchUpdates({
+            content.insert(contentsOf: expandableContent, at: position)
+            self.content[position..<position + expandableContent.count].forEach { $0.isCollapsed = false }
+            tableView.insertSections(IndexSet(integersIn: position..<position + expandableContent.count),
+                                     with: .none)
+        }, completion: { isCompleted in
+            if isCompleted {
+                zip(self.content, originalCollapseState).forEach { $0.0.isCollapsed = $0.1 }
+                self.tableView.reloadSections(IndexSet(integersIn: position..<position + expandableContent.count),
+                                              with: .none)
+            }
+        })
+    }
+
+    func remove(at index: Int) {
+        content.remove(at: index)
+        tableView.deleteSections(IndexSet(integer: index), with: .left)
     }
 
     func removeContent() {
         content.removeAll()
-        tableView.deleteSections(IndexSet(integersIn: content.startIndex..<content.endIndex), with: .none)
+        tableView.deleteSections(IndexSet(integersIn: content.startIndex..<content.endIndex), with: .left)
     }
 }
 
@@ -59,17 +64,6 @@ private extension ExpandableListViewController {
         tableView.register(nibWithCellClass: ExpandableListTableViewCell.self)
         tableView.delegate = self
         tableView.dataSource = self
-    }
-
-    func forceUpdateLayout() {
-        // Hacky way to force updating of inner self sizing table views
-        let originalCollapseState = content.map { $0.isCollapsed }
-        content.forEach { $0.isCollapsed = false }
-        tableView.performBatchUpdates ({
-            self.tableView.reloadSections(IndexSet(integersIn: self.content.startIndex..<self.content.endIndex), with: .none)
-            zip(content, originalCollapseState).forEach { $0.0.isCollapsed = $0.1 }
-            self.tableView.reloadSections(IndexSet(integersIn: self.content.startIndex..<self.content.endIndex), with: .none)
-        })
     }
 }
 

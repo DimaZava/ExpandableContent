@@ -48,7 +48,7 @@ class ExpandableContentView<T: ExpandContentManagable>: NSObject, ExpandViewable
 
     // MARK: - Actions
     @objc
-    func toggleShowMode() {
+    private func toggleShowMode() {
         toggleBlock(isCollapsed)
         isCollapsed.toggle()
         delegate?.didToggleShowMode(for: self)

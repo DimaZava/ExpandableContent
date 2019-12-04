@@ -41,6 +41,7 @@ class ViewController: UIViewController {
             DataItem(title: "Item 5", content: "Content 5"),
             DataItem(title: "Item 6", content: "Content 6")
         ]))
+        dataView1.isCollapsed = false
 //        dataView1.toggleShowMode()
 
         let dataView2 = configureExpandableDataView(with: DataContainer(content:[

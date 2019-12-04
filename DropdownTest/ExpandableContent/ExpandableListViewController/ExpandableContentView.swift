@@ -20,7 +20,11 @@ class ExpandableContentView<T: ExpandContentManagable>: NSObject, ExpandViewable
     var configurationBlock: ((UITapGestureRecognizer, UIView, inout ((Bool) -> Void)) -> Void)
 
     // ExpandViewable
-    var isCollapsed = true
+    var isCollapsed = true {
+        didSet {
+            toggleBlock(isCollapsed)
+        }
+    }
     var headerView = UIView()
     var contentTableView = SelfSizedTableView()
     var toggleBlock: ((Bool) -> Void) = { _ in }

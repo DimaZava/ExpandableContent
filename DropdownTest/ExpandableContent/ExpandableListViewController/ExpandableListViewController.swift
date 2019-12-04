@@ -24,22 +24,22 @@ class ExpandableListViewController: UIViewController {
 
     // MARK: - Actions
     func insert(expandableContent: [ExpandViewable], at index: Int? = nil) {
+
         guard !expandableContent.isEmpty,
             (index ?? 0) >= 0 else { return }
 
         let position = index ?? content.endIndex
-        let originalCollapseState = expandableContent.map { $0.isCollapsed }
-
         tableView.performBatchUpdates({
             content.insert(contentsOf: expandableContent, at: position)
-            self.content[position..<position + expandableContent.count].forEach { $0.isCollapsed = false }
-            tableView.insertSections(IndexSet(integersIn: position..<position + expandableContent.count),
-                                     with: .none)
+            tableView.insertSections(IndexSet(integersIn: position..<position + expandableContent.count), with: .none)
         }, completion: { isCompleted in
             if isCompleted {
-                zip(self.content, originalCollapseState).forEach { $0.0.isCollapsed = $0.1 }
-                self.tableView.reloadSections(IndexSet(integersIn: position..<position + expandableContent.count),
-                                              with: .none)
+                let sectionsToRefresh = self.content[position..<position + expandableContent.count].enumerated()
+                    .filter { !$0.element.isCollapsed }
+                    .map { $0.offset }
+                if !sectionsToRefresh.isEmpty {
+                    self.tableView.reloadSections(IndexSet(sectionsToRefresh), with: .none)
+                }
             }
         })
     }
